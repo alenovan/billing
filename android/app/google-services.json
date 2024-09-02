@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992747739253",
+    "project_id": "crbillingsystem",
+    "storage_bucket": "crbillingsystem.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992747739253:android:f01c3bf830604f808d003c",
+        "android_client_info": {
+          "package_name": "com.crb.gzb.biling.carabaobillingapps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnB3XBsGg4yLilvRCEI0A8UDzhM2NAsMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
