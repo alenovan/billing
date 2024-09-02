@@ -144,7 +144,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: Scaffold(
           backgroundColor: ColorConstant.bg,
           appBar: AppBar(
-            title: Text('History Order'),
+            backgroundColor: ColorConstant.primary,
+            title: Text(
+              "Riwayat",
+              style: GoogleFonts.openSans(color: Colors.white),
+            ),
+            automaticallyImplyLeading: false,
           ),
           body: MultiBlocProvider(
               providers: [
@@ -159,61 +164,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: Column(
                   children: [
                     _consumerApi(),
-                    Container(
-                      margin: EdgeInsets.all(20.w),
-                      decoration: BoxDecoration(
-                        color: ColorConstant.white,
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 2.0,
-                            spreadRadius: 1.0,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      padding: EdgeInsets.all(5.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Cari Nama',
-                              labelStyle: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.sp,
-                                color: Colors.grey,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                borderSide: BorderSide(
-                                  color: ColorConstant.borderinput,
-                                ),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 2.w, horizontal: 16.w),
-                            ),
-                            controller: searchController,
-                            onChanged: (e) {
-                              if (e.length <= 0) {
-                                _OrderBloc?.add(ActOrderHistory(
-                                    payload: RequestOrderSearch(
-                                        search: e, pageSize: 1000, page: 1)));
-                              }
-                            },
-                            onFieldSubmitted: (value) {
-                              _OrderBloc?.add(
-                                ActOrderHistory(
-                                  payload: RequestOrderSearch(
-                                      search: value, pageSize: 1000, page: 1),
-                                ),
-                              );
-                            },
-                            // Add controller and other TextFormField properties as needed
-                          ),
-                        ],
-                      ),
-                    ),
+                    SizedBox(height: 10.w,),
                     Expanded(
                       child: ListView.builder(
                         itemCount: order?.length ?? 0,
@@ -228,6 +179,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               Duration(seconds: difference.inSeconds);
                           return GestureDetector(
                             onTap: () {
+                              print(data.id.toString());
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -237,141 +189,121 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               );
                             },
                             child: Container(
-                              margin: EdgeInsets.only(
-                                  left: 20.w, right: 20.w, bottom: 10.w),
-                              decoration: BoxDecoration(
-                                color: ColorConstant.white,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(15)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 2.0,
-                                    spreadRadius: 1.0,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(15.w),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                              padding: EdgeInsets.all(10.w),
+                              child: Column(
                                 children: [
                                   Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Container(
-                                        margin: EdgeInsets.only(top: 6.w),
-                                        child: Image.asset(
-                                          ImageConstant.xinjue,
-                                          width: 50.w,
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 10.w,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                      Row(
                                         children: [
-                                          Text(
-                                            "#${(detailInformation?.clientId.toString() ?? "") + data.id.toString()}",
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 12.sp,
-                                                color: ColorConstant.titletext,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                          SizedBox(
-                                            height: 1.w,
-                                          ),
-                                          Text(
-                                            "Cust : ${data.ordersName}",
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 10.sp),
-                                          ),
-                                          SizedBox(
-                                            height: 1.w,
-                                          ),
-                                          Text(
-                                            "${data.name}",
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.poppins(
-                                                color: ColorConstant.subtext,
-                                                fontSize: 10.sp),
-                                          ),
-                                          SizedBox(
-                                            height: 1.w,
-                                          ),
-                                          Text(
-                                            "${DateFormat('MMMM d, y', 'de_DE').format(data.startTime!)}",
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.poppins(
-                                                color: ColorConstant.subtext,
-                                                fontSize: 10.sp),
-                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "${(detailInformation?.clientId.toString() ?? "") + data.id.toString()}",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.poppins(
+                                                    fontSize: 12.sp,
+                                                    color: ColorConstant.titletext,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                              SizedBox(
+                                                height: 1.w,
+                                              ),
+                                              Text(
+                                                "Cust : ${data.ordersName}",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.poppins(
+                                                    fontSize: 10.sp),
+                                              ),
+                                              SizedBox(
+                                                height: 1.w,
+                                              ),
+                                              Text(
+                                                "${data.name}",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.poppins(
+                                                    color: ColorConstant.subtext,
+                                                    fontSize: 10.sp),
+                                              ),
+                                              SizedBox(
+                                                height: 1.w,
+                                              ),
+                                              Text(
+                                                "${DateFormat('MMMM d, y', 'de_DE').format(data.startTime!)}",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.poppins(
+                                                    color: ColorConstant.subtext,
+                                                    fontSize: 10.sp),
+                                              ),
+                                            ],
+                                          )
                                         ],
-                                      )
-                                    ],
-                                  ),
-                                  if (data.statusData != null)
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          "${formatDuration(Duration(seconds: DateTime.parse(data!.endTime.toString()).difference(DateTime.parse(data!.startTime.toString())).inSeconds))}",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.poppins(
-                                              color: ColorConstant.primary,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 11.sp),
-                                        ),
-                                        SizedBox(
-                                          height: 5.w,
-                                        ),
-                                        Text(
-                                          "${data.type}",
-                                          textAlign: TextAlign.center,
-                                          style: GoogleFonts.poppins(
-                                              color: ColorConstant.subtext,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 10.sp),
-                                        ),
-                                        SizedBox(
-                                          height: 5.w,
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.only(
-                                              left: 5.w, right: 5.w),
-                                          width: 70.w,
-                                          decoration: BoxDecoration(
-                                            color: _getStatusColor(
-                                                data.statusData),
-                                            border: Border.all(
-                                              color: _getBorderColor(
-                                                  data.statusData),
-                                            ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(10)),
-                                          ),
-                                          height: 25.w,
-                                          child: Center(
-                                            child: Text(
-                                              _getTextStatusData(
-                                                      data.statusData) ??
-                                                  "",
+                                      ),
+                                      if (data.statusData != null)
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              "${formatDuration(Duration(seconds: DateTime.parse(data!.endTime.toString()).difference(DateTime.parse(data!.startTime.toString())).inSeconds))}",
                                               textAlign: TextAlign.center,
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                fontSize: 10.sp,
-                                                color: _getTextColor(
+                                              style: GoogleFonts.poppins(
+                                                  color: ColorConstant.primary,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 11.sp),
+                                            ),
+                                            SizedBox(
+                                              height: 5.w,
+                                            ),
+                                            Text(
+                                              "${data.type}",
+                                              textAlign: TextAlign.center,
+                                              style: GoogleFonts.poppins(
+                                                  color: ColorConstant.subtext,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 10.sp),
+                                            ),
+                                            SizedBox(
+                                              height: 5.w,
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  left: 5.w, right: 5.w),
+                                              width: 70.w,
+                                              decoration: BoxDecoration(
+                                                color: _getStatusColor(
                                                     data.statusData),
+                                                border: Border.all(
+                                                  color: _getBorderColor(
+                                                      data.statusData),
+                                                ),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)),
+                                              ),
+                                              height: 25.w,
+                                              child: Center(
+                                                child: Text(
+                                                  _getTextStatusData(
+                                                      data.statusData) ??
+                                                      "",
+                                                  textAlign: TextAlign.center,
+                                                  style:
+                                                  GoogleFonts.plusJakartaSans(
+                                                    fontSize: 10.sp,
+                                                    color: _getTextColor(
+                                                        data.statusData),
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                      ],
-                                    )
+                                          ],
+                                        )
+                                    ],
+                                  ),
+                                  Divider()
                                 ],
                               ),
                             ),

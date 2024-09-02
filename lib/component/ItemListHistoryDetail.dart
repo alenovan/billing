@@ -20,12 +20,12 @@ class ItemListHistoryDetail extends StatelessWidget {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.sp,
               fontWeight: FontWeight.bold,
-              color: ColorConstant.primary,
+              color: ColorConstant.titletext,
             )),
         Text(value,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11.sp,
-              color: ColorConstant.primary,
+              color: ColorConstant.titletext,
             ))
       ],
     );

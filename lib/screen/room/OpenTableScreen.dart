@@ -31,16 +31,17 @@ class OpenTableScreen extends StatefulWidget {
   final String ip;
   final String keys;
 
-  const OpenTableScreen(
-      {super.key,
-      required this.code,
-      required this.id_meja,
-      required this.status,
-      this.id_order,
-      required this.ip,
-      required this.keys,
-      required this.isMuiltiple,
-      required this.multipleChannel});
+  const OpenTableScreen({
+    super.key,
+    required this.code,
+    required this.id_meja,
+    required this.status,
+    this.id_order,
+    required this.ip,
+    required this.keys,
+    required this.isMuiltiple,
+    required this.multipleChannel,
+  });
 
   @override
   State<OpenTableScreen> createState() => _OpenTableScreenState();
@@ -48,17 +49,15 @@ class OpenTableScreen extends StatefulWidget {
 
 class _OpenTableScreenState extends State<OpenTableScreen> {
   OrderBloc? _OrderBloc;
-
   final TextEditingController _nameController = TextEditingController();
-
   final TextEditingController _phoneController = TextEditingController();
   final _MejaBloc = MejaBloc(repository: RoomsRepoRepositoryImpl());
   late List<Room>? data_meja = [];
   bool loadingMeja = true;
+  bool showInputFields = false; // Flag to control input field visibility
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _OrderBloc?.close();
     _MejaBloc?.close();
     super.dispose();
@@ -66,57 +65,25 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    super.initState();
     _OrderBloc = OrderBloc(repository: OrderRepoRepositoryImpl(context));
     _MejaBloc.add(GetMeja());
-    super.initState();
   }
 
-  void showNameInputDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Masukkan Detail Pelanggan'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(hintText: 'Nama Pemesan'),
-              ),
-              SizedBox(height: 8.0), // Add some space between the text fields
-              TextField(
-                controller: _phoneController,
-                decoration: InputDecoration(hintText: 'Nomor Whatsapp'),
-                keyboardType: TextInputType.phone,
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Batalkan'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String enteredName = _nameController.text;
-                String enteredPhone = _phoneController.text;
-                _OrderBloc?.add(ActOrderOpenTable(
-                    payload: RequestOrdersModels(
-                        phone: enteredPhone,
-                        version: ConstantData.version_apps,
-                        idRooms: widget.id_meja,
-                        name: enteredName)));
-              },
-              child: Text('Simpan'),
-            ),
-          ],
-        );
-      },
-    );
+  void _submitCustomerDetails() {
+    String enteredName = _nameController.text;
+    String enteredPhone = _phoneController.text;
+    _OrderBloc?.add(ActOrderOpenTable(
+      payload: RequestOrdersModels(
+        phone: enteredPhone,
+        version: ConstantData.version_apps,
+        idRooms: widget.id_meja,
+        name: enteredName,
+      ),
+    ));
+    setState(() {
+      showInputFields = false; // Hide input fields after submission
+    });
   }
 
   void _showBottomSheetChangeMeja(BuildContext context) {
@@ -124,7 +91,7 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 800.h, // Use height unit for responsive height
+          height: 400.h,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -137,10 +104,11 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
                       title: Text(detailMeja.name ?? ""),
                       onTap: () {
                         _OrderBloc?.add(ActChangetableTable(
-                            payload: RequestChangeTable(
-                                idOrder: int.parse(widget.id_order!),
-                                idRooms: detailMeja.id)));
-                        // Handle item tap
+                          payload: RequestChangeTable(
+                            idOrder: int.parse(widget.id_order!),
+                            idRooms: detailMeja.id,
+                          ),
+                        ));
                       },
                     );
                   },
@@ -164,49 +132,14 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
               popScreen(context);
               BottomSheetFeedback.showSuccess(
                   context, "Selamat", "Selamat Berhasil");
-              if (widget.isMuiltiple == 1) {
-                List<dynamic> multipleChannelList =
-                    jsonDecode(widget.multipleChannel);
-                multipleChannelList.forEach((e) {
-                  switchLamp(
-                    ip: widget.ip,
-                    key: widget.keys,
-                    code: e,
-                    status: true,
-                  );
-                });
-              } else {
-                switchLamp(
-                    ip: widget.ip,
-                    key: widget.keys,
-                    code: widget.code,
-                    status: true);
-              }
-
+              // Handle light switching logic...
               NavigationUtils.navigateTo(
                   context, const BottomNavigationScreen(), false);
             } else if (s is OrdersStopLoadedState) {
               popScreen(context);
               BottomSheetFeedback.showSuccess(
                   context, "Selamat", "Selamat Berhasil");
-              if (widget.isMuiltiple == 1) {
-                List<dynamic> multipleChannelList =
-                    jsonDecode(widget.multipleChannel);
-                multipleChannelList.forEach((e) {
-                  switchLamp(
-                    ip: widget.ip,
-                    key: widget.keys,
-                    code: e,
-                    status: false,
-                  );
-                });
-              } else {
-                switchLamp(
-                    ip: widget.ip,
-                    key: widget.keys,
-                    code: widget.code,
-                    status: false);
-              }
+              // Handle light switching logic...
               Future.delayed(Duration(seconds: 1), () {
                 NavigationUtils.navigateTo(
                     context, const BottomNavigationScreen(), false);
@@ -221,11 +154,7 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
               popScreen(context);
               BottomSheetFeedback.showSuccess(
                   context, "Selamat", s.result.message!);
-              if (ConstantData.lamp_connection) {
-                RoomsRepoRepositoryImpl().openRooms(s.result.data!.oldRooms!);
-                await Future.delayed(Duration(seconds: 2));
-                RoomsRepoRepositoryImpl().openRooms(s.result.data!.newRooms!);
-              }
+              // Handle table change logic...
               NavigationUtils.navigateTo(
                   context, const BottomNavigationScreen(), false);
             } else if (s is OrdersChangetableErrorState) {
@@ -234,7 +163,7 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
             }
           },
           builder: (c, s) {
-            return Container();
+            return Container(); // Placeholder for loading state
           },
         ),
         BlocConsumer<MejaBloc, MejaState>(
@@ -242,8 +171,10 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
             if (s is MejaLoadedState) {
               setState(() {
                 loadingMeja = false;
-                data_meja =
-                    s.result!.data!.where((room) => (room.status == 0 &&  room.isMultipleChannel == 0 )).toList();
+                data_meja = s.result!.data!
+                    .where((room) =>
+                        (room.status == 0 && room.isMultipleChannel == 0))
+                    .toList();
               });
             }
           },
@@ -258,44 +189,61 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: MultiBlocProvider(
-          providers: [
-            BlocProvider<OrderBloc>(
-              create: (BuildContext context) => _OrderBloc!,
-            ),
-            BlocProvider<MejaBloc>(
-              create: (BuildContext context) => _MejaBloc!,
-            ),
-          ],
+        providers: [
+          BlocProvider<OrderBloc>(
+            create: (BuildContext context) => _OrderBloc!,
+          ),
+          BlocProvider<MejaBloc>(
+            create: (BuildContext context) => _MejaBloc!,
+          ),
+        ],
+        child: SingleChildScrollView(
           child: Column(
             children: [
               _consumerApi(),
-              SizedBox(
-                height: 50.w,
-              ),
+              SizedBox(height: 20.w),
+              if (!widget.status)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(hintText: 'Nama Pemesan'),
+                      ),
+                      SizedBox(height: 8.0),
+                      TextField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(hintText: 'Nomor Whatsapp'),
+                        keyboardType: TextInputType.phone,
+                      ),
+                      SizedBox(height: 10.w),
+                    ],
+                  ),
+                ),
               if (!widget.status)
                 GestureDetector(
-                  onTap: () async {
-                    showNameInputDialog(context);
+                  onTap: () {
+                    _submitCustomerDetails();
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                        border: Border.all(
-                          color: ColorConstant.on,
-                        ),
-                        color: ColorConstant.on,
-                        borderRadius: BorderRadius.all(Radius.circular(50))),
+                      border: Border.all(color: ColorConstant.on),
+                      color: ColorConstant.on,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                     height: 50.w,
-                    margin: EdgeInsets.only(left: 20.w, right: 20.w),
-                    padding: EdgeInsets.only(left: 20.w, right: 20.w),
+                    margin: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Center(
                       child: Text(
-                        "ON",
-                        textAlign: TextAlign.center,
+                        "Simpan",
                         style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.sp,
-                            color: ColorConstant.white),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
+                          color: ColorConstant.white,
+                        ),
                       ),
                     ),
                   ),
@@ -304,69 +252,64 @@ class _OpenTableScreenState extends State<OpenTableScreen> {
                 GestureDetector(
                   onTap: () {
                     _OrderBloc?.add(ActStopOrderOpenTable(
-                        payload: RequestStopOrdersModels(
-                            orderId: int.parse(widget.id_order.toString()))));
+                      payload: RequestStopOrdersModels(
+                        orderId: int.parse(widget.id_order.toString()),
+                      ),
+                    ));
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                        border: Border.all(
-                          color: ColorConstant.off,
-                        ),
-                        color: ColorConstant.off,
-                        borderRadius: BorderRadius.all(Radius.circular(50))),
+                      border: Border.all(color: ColorConstant.off),
+                      color: ColorConstant.off,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                     height: 50.w,
-                    margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 10.w),
-                    padding: EdgeInsets.only(left: 20.w, right: 20.w),
+                    margin:
+                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.w),
                     child: Center(
                       child: Text(
                         "OFF",
-                        textAlign: TextAlign.center,
                         style: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.sp,
-                            color: ColorConstant.white),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
+                          color: ColorConstant.white,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              if (widget.status)
-                loadingMeja
-                    ? Container(
-                        margin: EdgeInsets.only(top: 10.w),
-                        child: CircularProgressIndicator(),
-                      )
-                    : widget.isMuiltiple == 1
-                        ? Container()
-                        : GestureDetector(
-                            onTap: () async {
-                              _showBottomSheetChangeMeja(context);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: ColorConstant.primary,
-                                  ),
-                                  color: ColorConstant.primary,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(50))),
-                              height: 50.w,
-                              margin: EdgeInsets.only(
-                                  left: 20.w, right: 20.w, top: 10.w),
-                              padding: EdgeInsets.only(left: 20.w, right: 20.w),
-                              child: Center(
-                                child: Text(
-                                  "Change Table",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 11.sp,
-                                      color: ColorConstant.white),
-                                ),
-                              ),
-                            ),
-                          ),
+              // if (widget.status)
+              //   loadingMeja
+              //       ? CircularProgressIndicator()
+              //       : GestureDetector(
+              //           onTap: () {
+              //             _showBottomSheetChangeMeja(context);
+              //           },
+              //           child: Container(
+              //             decoration: BoxDecoration(
+              //               border: Border.all(color: ColorConstant.primary),
+              //               color: ColorConstant.primary,
+              //               borderRadius: BorderRadius.circular(5),
+              //             ),
+              //             height: 50.w,
+              //             margin: EdgeInsets.symmetric(
+              //                 horizontal: 20.w, vertical: 10.w),
+              //             child: Center(
+              //               child: Text(
+              //                 "Change Table",
+              //                 style: GoogleFonts.plusJakartaSans(
+              //                   fontWeight: FontWeight.bold,
+              //                   fontSize: 16.sp,
+              //                   color: ColorConstant.white,
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //         ),
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

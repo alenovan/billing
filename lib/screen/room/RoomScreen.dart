@@ -33,42 +33,36 @@ class _RoomScreenState extends State<RoomScreen> {
 
   @override
   void initState() {
-    _OrderBloc = OrderBloc(repository: OrderRepoRepositoryImpl(context));
-
-    // TODO: implement initState
     super.initState();
+    _OrderBloc = OrderBloc(repository: OrderRepoRepositoryImpl(context));
     _OrderBloc?.add(getDetailOrders(id: widget.meja_id.toString()));
   }
 
   Widget _consumerApi() {
-    return Column(
-      children: [
-        BlocConsumer<OrderBloc, OrderState>(
-          listener: (c, s) {
-            if (s is OrdersLoadingState) {
-              LoadingDialog.show(c, "Mohon tunggu");
-            } else if (s is OrdersDetailLoadedState) {
-              setState(() {
-                popScreen(context);
-                dataGet = s.result.data![0];
-                loading = false;
+    return BlocConsumer<OrderBloc, OrderState>(
+      listener: (c, s) {
+        if (s is OrdersLoadingState) {
+          LoadingDialog.show(c, "Please wait...");
+        } else if (s is OrdersDetailLoadedState) {
+          setState(() {
+            popScreen(context);
+            dataGet = s.result.data![0];
+            loading = false;
 
-                if (dataGet?.type == "OPEN-BILLING" &&
-                    dataGet?.statusOrder == "START") {
-                  _currentIndex = 1;
-                } else {
-                  _currentIndex = 0;
-                }
-              });
-            } else if (s is OrdersErrorState) {
-              BottomSheetFeedback.showError(context, "Mohon Maaf", s.message);
+            if (dataGet?.type == "OPEN-BILLING" &&
+                dataGet?.statusOrder == "START") {
+              _currentIndex = 1;
+            } else {
+              _currentIndex = 0;
             }
-          },
-          builder: (c, s) {
-            return Container();
-          },
-        ),
-      ],
+          });
+        } else if (s is OrdersErrorState) {
+          BottomSheetFeedback.showError(context, "Sorry", s.message);
+        }
+      },
+      builder: (c, s) {
+        return Container(); // This will hold the loading indicator if needed
+      },
     );
   }
 
@@ -81,250 +75,117 @@ class _RoomScreenState extends State<RoomScreen> {
         ),
       ],
       child: WillPopScope(
-        onWillPop: ()async{
+        onWillPop: () async {
           NavigationUtils.navigateTo(
               context, const BottomNavigationScreen(), false);
           return false;
         },
         child: Scaffold(
-            appBar: AppBar(
-              title: loading
-                  ? CircularProgressIndicator()
-                  : Text(dataGet?.name ?? ""),
-            ),
-            body: Stack(
-              children: [
-                _consumerApi(),
-                loading
-                    ? CircularProgressIndicator()
-                    : Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.all(20.w),
-                      height: 50.w,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (dataGet?.type == "OPEN-TABLE" ||
-                              dataGet?.type.toString() == "null" ||
-                              dataGet?.statusOrder == "STOP")
-                            Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    _navigateToPage(0);
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: _currentIndex == 0
-                                              ? ColorConstant.primary
-                                              : ColorConstant.subtext,
-                                        ),
-                                        color: _currentIndex == 0
-                                            ? ColorConstant.primary
-                                            : Colors.transparent,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(50))),
-                                    height: 50.w,
-                                    width: 100.w,
-                                    padding: EdgeInsets.only(
-                                        left: 20.w, right: 20.w),
-                                    child: Center(
-                                      child: Text(
-                                        "Open Table",
-                                        textAlign: TextAlign.center,
-                                        style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 11.sp,
-                                            color: _currentIndex == 0
-                                                ? ColorConstant.white
-                                                : ColorConstant.subtext),
-                                      ),
-                                    ),
-                                  ),
-                                )),
-                          SizedBox(
-                            width: 10.w,
-                          ),
-                          if (dataGet?.type == "OPEN-BILLING" ||
-                              dataGet?.type.toString() == "null" ||
-                              dataGet?.statusOrder == "STOP")
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  _navigateToPage(1);
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: _currentIndex == 1
-                                            ? ColorConstant.primary
-                                            : ColorConstant.subtext,
-                                      ),
-                                      color: _currentIndex == 1
-                                          ? ColorConstant.primary
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(50))),
-                                  height: 50.w,
-                                  padding: EdgeInsets.only(
-                                      left: 20.w, right: 20.w),
-                                  child: Center(
-                                    child: Text(
-                                      "Open Billing",
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11.sp,
-                                          color: _currentIndex == 1
-                                              ? ColorConstant.white
-                                              : ColorConstant.subtext),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
+          resizeToAvoidBottomInset: true,
+          appBar: AppBar(
+            backgroundColor: ColorConstant.primary,
+            title: loading
+                ? CircularProgressIndicator()
+                : Text(dataGet?.name ?? "", style: GoogleFonts.openSans(color: Colors.white)),
+          ),
+          body: Stack(
+            children: [
+              _consumerApi(),
+              loading
+                  ? Center(child: CircularProgressIndicator())
+                  : Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(20.w),
+                    height: 50.w,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildTabButton(0, "Open Table"),
+                        SizedBox(width: 10.w),
+                        _buildTabButton(1, "Open Billing"),
+                      ],
                     ),
-                    Expanded(
-                      child: PageView(
-                        controller: _pageController,
-                        onPageChanged: (index) {
-                          setState(() {
-                            _currentIndex = index;
-                          });
-                        },
-                        children: [
-                          if (dataGet?.type == "OPEN-TABLE" ||
-                              dataGet?.type.toString() == "null" ||
-                              dataGet?.statusOrder == "STOP")
-                            OpenTableScreen(
-                              isMuiltiple: dataGet?.isMultipleChannel ?? 0,
-                              id_order: dataGet?.id.toString(),
-                              id_meja: dataGet!.roomId.toString(),
-                              code: dataGet?.code ?? "",
-                              status: dataGet?.statusOrder == "START"
-                                  ? true
-                                  : false,
-                              ip: dataGet?.ip ?? "",
-                              keys: dataGet?.secret ?? "",
-                              multipleChannel:
-                              dataGet?.multipleChannel ?? "",
-                            ),
-                          if (dataGet?.type == "OPEN-BILLING" ||
-                              dataGet?.type.toString() == "null" ||
-                              dataGet?.statusOrder == "STOP")
-                            BillingScreen(
-                              isMuiltiple: dataGet?.isMultipleChannel ?? 0,
-                              multipleChannel:
-                              dataGet?.multipleChannel ?? "",
-                              id_order: dataGet?.id.toString(),
-                              id_meja: dataGet!.roomId.toString(),
-                              code: dataGet?.code ?? "",
-                              status: dataGet?.statusOrder == "START"
-                                  ? true
-                                  : false,
-                              ip: dataGet?.ip ?? "",
-                              keys: dataGet?.secret ?? "",
-                            ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                      padding: EdgeInsets.all(16.0),
-                      color: ColorConstant.white,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Test Lampu",
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
+                  ),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
+                      },
+                      children: [
+                        if (dataGet?.type == "OPEN-TABLE" ||
+                            dataGet?.type.toString() == "null" ||
+                            dataGet?.statusOrder == "STOP")
+                          OpenTableScreen(
+                            isMuiltiple: dataGet?.isMultipleChannel ?? 0,
+                            id_order: dataGet?.id.toString(),
+                            id_meja: dataGet!.roomId.toString(),
+                            code: dataGet?.code ?? "",
+                            status: dataGet?.statusOrder == "START",
+                            ip: dataGet?.ip ?? "",
+                            keys: dataGet?.secret ?? "",
+                            multipleChannel: dataGet?.multipleChannel ?? "",
                           ),
-                          Text(
-                            "Tombol ini digunakan untuk menguji lampu. Itu tidak akan dicatat dalam transaksi. Gunakan jika lampu tidak menyala atau mati",
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.sp,
-                              color: Colors.black,
-                            ),
-                            textAlign: TextAlign.center,
+                        if (dataGet?.type == "OPEN-BILLING" ||
+                            dataGet?.type.toString() == "null" ||
+                            dataGet?.statusOrder == "STOP")
+                          BillingScreen(
+                            isMuiltiple: dataGet?.isMultipleChannel ?? 0,
+                            multipleChannel: dataGet?.multipleChannel ?? "",
+                            id_order: dataGet?.id.toString(),
+                            id_meja: dataGet!.roomId.toString(),
+                            code: dataGet?.code ?? "",
+                            status: dataGet?.statusOrder == "START",
+                            ip: dataGet?.ip ?? "",
+                            keys: dataGet?.secret ?? "",
                           ),
-                          SizedBox(
-                            height: 10.w,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () async {
-                                  LoadingDialog.show(context, "Mohon tunggu");
-                                  switchLamp(
-                                      ip: dataGet?.ip ?? "",
-                                      key: dataGet?.secret ?? "",
-                                      code: dataGet?.code ?? "",
-                                      status: true);
-                                  await Future.delayed(Duration(seconds: 2));
-                                  switchLamp(
-                                      ip: dataGet?.ip ?? "",
-                                      key: dataGet?.secret ?? "",
-                                      code: dataGet?.code ?? "",
-                                      status: false);
-                                  await Future.delayed(Duration(seconds: 1));
-                                  popScreen(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: ColorConstant.alarm,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  "TEST",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10.sp,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                              // ElevatedButton(
-                              //   onPressed: () async{
-                              //     LoadingDialog.show(context, "Mohon tunggu");
-                              //     switchLamp(
-                              //       ip: dataGet?.ip ?? "",
-                              //       key: dataGet?.secret ?? "",
-                              //       code: dataGet?.code ?? "",
-                              //       status: false,
-                              //     );
-                              //     await Future.delayed(Duration(seconds: 2));
-                              //     popScreen(context);
-                              //   },
-                              //   style: ElevatedButton.styleFrom(
-                              //     backgroundColor: ColorConstant.off,
-                              //     shape: RoundedRectangleBorder(
-                              //       borderRadius: BorderRadius.circular(20),
-                              //     ),
-                              //   ),
-                              //   child: Text(
-                              //     "OFF",
-                              //     style: GoogleFonts.plusJakartaSans(
-                              //       fontSize: 10.sp,
-                              //       color: Colors.white,
-                              //     ),
-                              //   ),
-                              // ),
-                            ],
-                          ),
-                        ],
-                      )),
-                ),
-              ],
-            )),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String label) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          _navigateToPage(index);
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: _currentIndex == index
+                  ? ColorConstant.primary
+                  : ColorConstant.subtext,
+            ),
+            color: _currentIndex == index
+                ? ColorConstant.primary
+                : Colors.transparent,
+          ),
+          height: 50.w,
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Center(
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11.sp,
+                color: _currentIndex == index
+                    ? ColorConstant.white
+                    : ColorConstant.subtext,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

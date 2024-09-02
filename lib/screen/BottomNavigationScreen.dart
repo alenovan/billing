@@ -44,90 +44,91 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        child: Scaffold(
-          backgroundColor: ColorConstant.bg,
-          bottomNavigationBar: Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8.0,
-                  spreadRadius: 2.0,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Container(
-              height: 56.0,
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      _navigateToPage(0);
-                    },
-                    child: Image.asset(
-                      _currentIndex == 0
-                          ? ImageConstant.home_selected
-                          : ImageConstant.home,
-                      width: 45.w,
-                      height: 45.w,
-                    ),
-                  ),
-                  VerticalDivider(
-                    color: ColorConstant.dividermenu,
-                    thickness: 1.0,
-                    width: 20.0,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      _navigateToPage(1);
-                    },
-                    child: Image.asset(
-                      _currentIndex == 1
-                          ? ImageConstant.history
-                          : ImageConstant.history_selected,
-                      width: 45.w,
-                      height: 45.w,
-                    ),
-                  ),
-                  VerticalDivider(
-                    color: ColorConstant.dividermenu,
-                    thickness: 1.0,
-                    width: 20.0,
-                  ),
-                  InkWell(
-                    onTap: () {
-                      _navigateToPage(2);
-                    },
-                    child: Image.asset(
-                      _currentIndex == 2
-                          ? ImageConstant.setting_selected
-                          : ImageConstant.setting,
-                      width: 45.w,
-                      height: 45.w,
-                    ),
-                  ),
-                ],
+      child: Scaffold(
+        backgroundColor: ColorConstant.bg,
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(vertical: 10.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8.0,
+                spreadRadius: 2.0,
+                offset: Offset(0, -2),
               ),
-            ),
+            ],
           ),
-          body: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            children: [HomeScreen(), HistoryScreen(), SettingScreen()],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _bottomNavItem(
+                icon: Icons.home,
+                label: "Home",
+                index: 0,
+              ),
+              _bottomNavItem(
+                icon: Icons.history,
+                label: "History",
+                index: 1,
+              ),
+              _bottomNavItem(
+                icon: Icons.settings,
+                label: "Settings",
+                index: 2,
+              ),
+            ],
           ),
         ),
-        onWillPop: () async {
-          return false;
-        });
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          children: [HomeScreen(), HistoryScreen(), SettingScreen()],
+        ),
+      ),
+      onWillPop: () async {
+        return false;
+      },
+    );
+  }
+
+  Widget _bottomNavItem({required IconData icon, required String label, required int index}) {
+    return InkWell(
+      onTap: () {
+        _navigateToPage(index);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 50.w,
+            height: 50.h,
+            decoration: BoxDecoration(
+              color: _currentIndex == index ? ColorConstant.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: _currentIndex == index ? Colors.white : Colors.grey,
+              size: 24,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: _currentIndex == index ? ColorConstant.primary : Colors.grey,
+              fontSize: 12.sp,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _navigateToPage(int index) async {

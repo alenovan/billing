@@ -20,135 +20,113 @@ class ClientInformation extends StatefulWidget {
 }
 
 class _ClientInformationState extends State<ClientInformation> {
-  final _ConfigsBloc = ConfigsBloc(repository: ConfigRepoRepositoryImpl());
+  late final ConfigsBloc _configsBloc;
   DetailInformation? detailInformation;
-
-  Widget _consumerApi() {
-    return Column(
-      children: [
-        BlocConsumer<ConfigsBloc, ConfigsState>(
-          listener: (c, s) {
-            if (s is ConfigsLoadingState) {
-              LoadingDialog.show(c, "Mohon tunggu");
-            } else if (s is ConfigsListLoadedState) {
-              popScreen(context);
-              setState(() {
-                detailInformation = s.result.data!.first!;
-              });
-            } else if (s is ConfigsErrorState) {
-              popScreen(c);
-              BottomSheetFeedback.showError(context, "Mohon Maaf", s.message);
-            }
-          },
-          builder: (c, s) {
-            return Container();
-          },
-        ),
-      ],
-    );
-  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _ConfigsBloc.add(GetConfig());
+    _configsBloc = ConfigsBloc(repository: ConfigRepoRepositoryImpl());
+    _configsBloc.add(GetConfig());
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _configsBloc.close();
     super.dispose();
+  }
+
+  Widget _buildClientInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.bold,
+              color: ColorConstant.primary,
+            ),
+          ),
+          Text(
+            value,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClientInfoCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.w),
+      decoration: BoxDecoration(
+        color: ColorConstant.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 2.0,
+            spreadRadius: 1.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(15.w),
+      child: Column(
+        children: [
+          _buildClientInfoRow("Client Name", detailInformation?.clientName ?? ""),
+          _buildClientInfoRow("Client Id", detailInformation?.clientId.toString() ?? ""),
+          _buildClientInfoRow("Apk Version", ConstantData.version_apps),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Client Information'),
+      appBar: AppBar(
+        backgroundColor: ColorConstant.primary,
+        title: Text(
+          "Client Information",
+          style: GoogleFonts.openSans(color: Colors.white),
         ),
-        body: MultiBlocProvider(
-            providers: [
-              BlocProvider<ConfigsBloc>(
-                create: (BuildContext context) => _ConfigsBloc,
-              ),
-            ],
-            child: Wrap(
+      ),
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider<ConfigsBloc>(
+            create: (_) => _configsBloc,
+          ),
+        ],
+        child: BlocConsumer<ConfigsBloc, ConfigsState>(
+          listener: (context, state) {
+            if (state is ConfigsLoadingState) {
+              LoadingDialog.show(context, "Mohon tunggu");
+            } else if (state is ConfigsListLoadedState) {
+              popScreen(context);
+              setState(() {
+                detailInformation = state.result.data?.first;
+              });
+            } else if (state is ConfigsErrorState) {
+              popScreen(context);
+              BottomSheetFeedback.showError(context, "Mohon Maaf", state.message);
+            }
+          },
+          builder: (context, state) {
+            return ListView(
               children: [
-                _consumerApi(),
-                Container(
-                    margin:
-                        EdgeInsets.only(left: 20.w, right: 20.w, bottom: 10.w,top: 20.w),
-                    decoration: BoxDecoration(
-                      color: ColorConstant.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 2.0,
-                          spreadRadius: 1.0,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.all(15.w),
-                    child: Container(
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Client Name",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: ColorConstant.primary,
-                                  )),
-                              Text(detailInformation?.clientName ?? "",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold
-                                  )),
-                            ],
-                          ),
-                          SizedBox(height: 10.w,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Client Id",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: ColorConstant.primary,
-                                  )),
-                              Text(detailInformation?.clientId.toString() ?? "",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                            ],
-                          ),
-                          SizedBox(height: 10.w,),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Apk Version",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: ColorConstant.primary,
-                                  )),
-                              Text(ConstantData.version_apps,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 11.sp,
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ))
+                _buildClientInfoCard(),
               ],
-            )));
+            );
+          },
+        ),
+      ),
+    );
   }
 }

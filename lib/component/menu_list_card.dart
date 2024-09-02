@@ -158,40 +158,20 @@ class _MenuListCardState extends State<MenuListCard> {
             }
           },
           child: Container(
-            margin: EdgeInsets.all(8.w),
-            child: Stack(
+            child: Column(
               children: [
                 _consumerApi(),
                 Container(
                   child: Container(
                     decoration: BoxDecoration(
                       color: ColorConstant.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 2.0,
-                          spreadRadius: 1.0,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
                     ),
-                    padding: EdgeInsets.all(15.w),
+                    padding: EdgeInsets.all(10.w),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
-                            Container(
-                              margin: EdgeInsets.only(top: 6.w),
-                              child: Image.asset(
-                                ImageConstant.xinjue,
-                                width: 50.w,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10.w,
-                            ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -292,7 +272,7 @@ class _MenuListCardState extends State<MenuListCard> {
                             height: 30.w,
                             child: Center(
                               child: Text(
-                                "In Use",
+                                "Digunakan",
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.plusJakartaSans(
                                     fontSize: 11.sp, color: Colors.white),
@@ -302,7 +282,8 @@ class _MenuListCardState extends State<MenuListCard> {
                       ],
                     ),
                   ),
-                )
+                ),
+                Divider()
               ],
             ),
           ),

@@ -54,7 +54,11 @@ class _ListSettingState extends State<ListSetting> {
     return Scaffold(
       backgroundColor: ColorConstant.bg,
       appBar: AppBar(
-        title: Text('List Table'),
+        backgroundColor: ColorConstant.primary,
+        title: Text(
+          "List Table",
+          style: GoogleFonts.openSans(color: Colors.white),
+        ),
       ),
       body: MultiBlocProvider(
           providers: [
@@ -103,7 +107,7 @@ class _ListSettingState extends State<ListSetting> {
                       code: data!.data![index].code!,
                       ip: searchController.text,
                       keys: ConstantData.key_config,
-                      isMuiltiple: data!.data![index].isMultipleChannel,
+                      isMultiple: data!.data![index].isMultipleChannel,
                       multipleChannel: data!.data![index].multipleChannel ?? "",
                     );
                   },
